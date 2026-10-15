@@ -146,8 +146,6 @@ Two tables hold the corpus:
 | `papers` | `id` (arXiv ID, primary key), `title`, `summary`, `authors`, `link`, `pdf_path`, `full_text` |
 | chunk table (`new_chunked`) | `id` (serial), `source_id` (→ `papers.id`), `chunk_index`, `chunk_text` |
 
-![PostgreSQL papers table](docs/images/postgres_papers_table.png)
-*The `papers` table with 1,910 rows.*
 
 ### 4. Chunking
 
@@ -167,19 +165,16 @@ def chunk_text(text, chunk_size=500, overlap=100):
 
 The overlap means a sentence cut at a chunk boundary still appears whole in the next chunk, so no idea is lost. This produced **33,714 chunks**.
 
-![Chunk table](docs/images/postgres_chunked_docs.png)
 
 ### 5. Embeddings and vector search — Qdrant
 
 Each chunk is encoded with `all-MiniLM-L6-v2` (384 dimensions, ~80 MB, very fast) and uploaded to a Qdrant collection called `Master_thesis` with **cosine distance**. Each point's payload stores `postgres_id`, which links the vector back to its text row in PostgreSQL.
 
-![Qdrant collection](docs/images/qdrant_collection.png)
 
 ### 6. Knowledge graph — spaCy + Neo4j
 
 For every sentence in every chunk, spaCy's dependency parser finds the **subject**, the main **verb** (lemmatised) and the **object**. Each match becomes a triplet such as `(Regularity, use, binding)`. All triplets are written to `triplets.csv` together with their `chunk_id`.
 
-![Extracted triplets](docs/images/triplets_csv.png)
 
 The CSV is loaded into Neo4j with Cypher. `MERGE` makes sure each entity becomes one node, and each triplet becomes a `RELATION` edge:
 
@@ -190,8 +185,6 @@ MERGE (o:Entity {name: row.object})
 MERGE (s)-[r:RELATION {type: row.relation, chunk_id: row.chunk_id}]->(o);
 ```
 
-![Knowledge graph in Neo4j](docs/images/knowledge_graph.png)
-*Part of the resulting knowledge graph.*
 
 ### 7. Querying
 
@@ -201,17 +194,11 @@ When a question arrives:
 2. Their text and `source_id` are fetched from PostgreSQL.
 3. Neo4j returns triplets whose entities match the question.
 
-![Top retrieved chunks](docs/images/ui_top_chunks.png)
-*Top-5 chunks shown in the UI.*
-
-![Retrieved triplets](docs/images/ui_triplets.png)
-*Triplets returned from the knowledge graph for the same query.*
 
 ### 8. Prompting
 
 The chunks and triplets are merged into one context block and inserted into a prompt that tells the model to use **only** that context. This strict grounding is the main defence against hallucination. The prompt design refined in the thesis:
 
-![Final prompt](docs/images/final_prompt.png)
 
 ### 9. Answer generation
 
@@ -310,9 +297,6 @@ Open the URL Streamlit prints, type a question and click **Get Answer**.
 
 Both pipelines were tested on **10 questions**, each from a different paper in the corpus. Questions cover fact-finding, concept explanation and comparison. Reference answers were taken directly from the source papers.
 
-![Evaluation data](docs/images/evaluation_data.png)
-*`Final_evaluation.csv`: question, reference answer, GraphRAG answer, RAG answer.*
-
 Three automatic metrics compare each generated answer with its reference:
 
 | Metric | What it measures | Level |
@@ -339,8 +323,6 @@ python visual.py     # summary bar chart
 | BLEU | 2.11 | **6.16** | ≈ 2.92× (+192%) |
 | ROUGE-1 F1 | 0.52 | **0.83** | ≈ 1.60× (+59.6%) |
 | ROUGE-L F1 | 0.13 | **0.16** | ≈ 1.23× (+23.1%) |
-
-![Metrics comparison](docs/images/metrics_bar.png)
 
 <table>
   <tr>
