@@ -48,7 +48,8 @@ The thesis asks four research questions:
 
 ## How it works — the big picture
 
-![Architecture diagram](docs/images/architecture.png)
+![Architecture diagram](Architecture.png)
+
 *Figure: System architecture (Figure 10 in the thesis).*
 
 The system has two phases.
