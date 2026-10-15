@@ -325,7 +325,7 @@ python visual.py     # summary bar chart
 | ROUGE-1 F1 | 0.52 | **0.83** | ≈ 1.60× (+59.6%) |
 | ROUGE-L F1 | 0.13 | **0.16** | ≈ 1.23× (+23.1%) |
 
-<table>
+<!-- <table>
   <tr>
     <td><img src="docs/images/bleu_boxplot.png" alt="BLEU box plot"></td>
     <td><img src="docs/images/rouge1_boxplot.png" alt="ROUGE-1 box plot"></td>
@@ -336,7 +336,7 @@ python visual.py     # summary bar chart
     <td align="center">ROUGE-1 F1</td>
     <td align="center">ROUGE-L F1</td>
   </tr>
-</table>
+</table> -->
 
 **What the numbers mean**
 
